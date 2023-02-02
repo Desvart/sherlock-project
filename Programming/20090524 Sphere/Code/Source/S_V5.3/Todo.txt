@@ -1,0 +1,41 @@
+- Detection
+
+- Autre m�thodes de r�ductions de dimension
+- LDA
+- Kernel LDA / PCA
+http://en.wikipedia.org/wiki/Dimensionality_reduction
+http://en.wikipedia.org/wiki/Nonlinear_dimensionality_reduction
+http://en.wikipedia.org/wiki/Linear_discriminant_analysis
+
+- 20 EM iterations
+- Split & Merge EM
+
+- Autre techniques de classification
+- HMM
+- ICA (cf. AD) - Apparement plus n�cessaire
+- SVM
+- AdaBoost
+- R�seau de Neurones
+
+- Autre type de modelisation
+- Autoregressive model
+- ARMA
+
+- rejection class and rejection methods
+
+- M�ler le GMM(1) avec Bayes et supprimer Bayes dans les options initiales
+- R�f�rences concernant les fonction bas niveaux
+- Commentaires
+- Documentation
+
+
+
+
+- G�n�rer un fichier de log pour chaque it�ration (entre autre les fichiers utilis�s pour les set d'apprentissage)
+
+- Pouvoir charger une structure "config + database + feature" et court-circuiter tout jusqu'au loop (utile pour faire des apprentissage diff�rent sur des sets similaires et comparer les r�sultats)
+
+- Comment boucler la boucle d'apprentissage de mani�re � ce que chaque apprentissage apporte quelque chose de plus au suivant? Eliminer les fichiers "corrompus"? Am�liorer EM? 
+-> Essayer de faire un ciblage it�ratif des points initiaux pour EM (avec le m�me set d'apprentissage) puis optimiser pour augmenter la vitesse de convergence de EM
+
+- Faire un graphe repr�sentant la complexit� du mod�le (p.ex.: le nombre de gaussienne et le nombre d'�tat) avec les performances.

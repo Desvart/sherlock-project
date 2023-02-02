@@ -1,0 +1,57 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Data structures</TITLE>
+<META NAME="description" CONTENT="Data structures">
+<META NAME="keywords" CONTENT="h2m">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="h2m.css">
+</HEAD>
+<BODY LANG="EN" >
+ <B> Next:</B> <A NAME="tex2html79" HREF="node5.html">Examples</A>
+<B>Up:</B> <A NAME="tex2html77" HREF="h2m.html">h2m : MATLAB functions </A>
+<B> Previous:</B> <A NAME="tex2html71" HREF="node3.html">Changes and bug fixes</A>
+<BR> <P>
+<H1><A NAME="SECTION00040000000000000000">Data structures</A></H1>
+<P>
+No specific data structures have been used, so that a HMM consists of:
+<DL ><DT><STRONG>pi0</STRONG>
+<DD> Row vector containing the probability distribution for the first (unobserved) state: <IMG WIDTH=130 HEIGHT=27 ALIGN=MIDDLE ALT="tex2html_wrap_inline199" SRC="img1.gif">.
+  <DT><STRONG>A</STRONG>
+<DD> Transition matrix: <IMG WIDTH=192 HEIGHT=28 ALIGN=MIDDLE ALT="tex2html_wrap_inline201" SRC="img2.gif">.
+  <DT><STRONG>mu</STRONG>
+<DD> Mean vectors (of the state-conditional distributions) stacked as row vectors, such that <code>mu(i,:)</code> is the mean (row) vector corresponding to the <I>i</I>-th state of the HMM.
+  <DT><STRONG>Sigma</STRONG>
+<DD> Covariance matrices. These are stored one above the other in two different way depending on whether full or diagonal covariance matrices are used: for full covariance matrices,
+<PRE>Sigma((1+(i-1)*p):(i*p),:)</PRE>
+(where <I>p</I> is the dimension of the observation vectors) is the covariance matrix corresponding to the <I>i</I>-th state; for diagonal covariance matrices, <code>Sigma(i,:)</code> contains the diagonal of the covariance matrix for the <I>i</I>-th state (ie. the diagonal coefficients stored as row vectors).
+<P>
+</DL>
+For a left-right HMM, <code>pi0</code> is assumed to be deterministic (ie. <code>pi_0 =</code> <code>[1 0 ... 0]</code>) and <code>A</code> can be made sparse in order to save memory space (<code>A</code> should be upper triangular for a left-right model).
+<P>
+A Gaussian mixture model, is rather similar except that as the underlying jump process being i.i.d., <code>pi0</code> and <code>A</code> are replaced by a single row vector containing the mixture weights <code>w</code> (<IMG WIDTH=123 HEIGHT=27 ALIGN=MIDDLE ALT="tex2html_wrap_inline211" SRC="img3.gif">).
+<P>
+Most functions (those that have <code>mu</code> and <code>Sigma</code> among their input arguments) are able to determine the dimensions of the model (size of observation vectors and number of states) and the type of covariance matrices (full or diagonal) from the size of their input arguments. This is achieved by the two functions <code>hmm_chk</code> and <code>mix_chk</code>.
+<P>
+For more specialized variables such as those that are used during the forward-backward recursions, I have tried to use the notations of L. R. Rabiner in [<A HREF="node16.html#Rabiner:HMM">3</A>] (or [<A HREF="node16.html#Rabiner:SpeechRec">4</A>]) which seem pretty standard:
+<DL ><DT><STRONG>alpha</STRONG>
+<DD> Forward variables: <IMG WIDTH=222 HEIGHT=27 ALIGN=MIDDLE ALT="tex2html_wrap_inline213" SRC="img4.gif">.
+<DT><STRONG>beta</STRONG>
+<DD> Backward variables: <IMG WIDTH=239 HEIGHT=27 ALIGN=MIDDLE ALT="tex2html_wrap_inline215" SRC="img5.gif">.
+<DT><STRONG>gamma</STRONG>
+<DD> A posteriori distributions of the states:
+<BR><IMG WIDTH=361 HEIGHT=18 ALIGN=BOTTOM ALT="displaymath197" SRC="img6.gif"><BR>
+</DL>
+<P>
+I have also tried to use systematically the convention of multivariate data analysis that the matrices should have ``more rows than columns'', so that the observation vectors are stacked in <code>X</code> as row vectors (the number of observed vectors being usually greater than their dimension). The same is true for <code>alpha</code>, <code>beta</code> and <code>gamma</code> which are <IMG WIDTH=49 HEIGHT=24 ALIGN=MIDDLE ALT="tex2html_wrap_inline217" SRC="img7.gif"> matrices (where <I>T</I> is the number of observation vectors and <I>N</I> the number of states).
+<P>
+<HR><B> Next:</B> <A NAME="tex2html79" HREF="node5.html">Examples</A>
+<B>Up:</B> <A NAME="tex2html77" HREF="h2m.html">h2m : MATLAB functions </A>
+<B> Previous:</B> <A NAME="tex2html71" HREF="node3.html">Changes and bug fixes</A>
+<P><ADDRESS>
+Olivier Cappé / July 16, 1997
+</ADDRESS>
+</BODY>
+</HTML>

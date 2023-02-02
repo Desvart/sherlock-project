@@ -1,0 +1,39 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Ergodic model with full covariance matrices</TITLE>
+<META NAME="description" CONTENT="Ergodic model with full covariance matrices">
+<META NAME="keywords" CONTENT="h2m">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="h2m.css">
+</HEAD>
+<BODY LANG="EN" >
+ <B> Next:</B> <A NAME="tex2html104" HREF="node7.html">Left-right HMM</A>
+<B>Up:</B> <A NAME="tex2html102" HREF="node5.html">Examples</A>
+<B> Previous:</B> <A NAME="tex2html96" HREF="node5.html">Examples</A>
+<BR> <P>
+<H2><A NAME="SECTION00051000000000000000">Ergodic model with full covariance matrices</A></H2>
+<P>
+Let <code>X</code> denote a matrix containing <code>T</code> observed vectors, the EM estimation of the parameters take the following form:
+<PRE>for i = 1:n_iter
+  [alpha, beta, logscale, dens] = hmm_fb(X, A, pi0, mu, Sigma);
+  logl(i) = log(sum(alpha(T,:))) + logscale;
+  [A, pi0] = hmm_tran(alpha, beta, dens, A, pi0);
+  [mu, Sigma] = hmm_dens(X, alpha, beta, COV_TYPE);
+end;</PRE>
+<code>COV_TYPE</code> is just a flag that should be set to 0 when using full covariance matrices and to 1 for diagonal covariance matrices.
+<P>
+Notice that at each step, the log-likelihood is computed from the forward variables using a correction term <code>logscale</code> returned by <code>hmm_fb</code> (for forward-backward) which contains the sum of the logarithmic scaling factors used during the computation of <code>alpha</code> and <code>beta</code>. In the present version scaling of the forward variable is performed at each time index <IMG WIDTH=73 HEIGHT=26 ALIGN=MIDDLE ALT="tex2html_wrap_inline223" SRC="img8.gif"> (which means that each row of the <code>alpha</code> matrix sums to one, except the first one). This systematic scaling appears to be much safer when using input data with largely varying range. The backward variable is scaled using the same normalization factors as indicated in [<A HREF="node16.html#Rabiner:HMM">3</A>] (using exactly the same normalization factors is important for the re-estimation of the coefficients of the transition matrix). Note that the mere suppression of the scaling procedure would lead to numerical problems in almost every cases of interest (when the length of the observation sequences if greater than 50 for instance) despite the double precision representation used by MATLAB.
+<P>
+If you don't want to see what's going on you can simply use
+<PRE>[A, pi0, mu, Sigma, logl] = hmm(X, A, pi0, mu, Sigma, n_iter);</PRE>
+which calls the very same piece of code except for the fact that the messages concerning the execution time are suppressed: all the computational functions print those messages by default but this can be suppressed by supplying and optional argument (named <code>QUIET</code>) different from zero.
+<P>
+<BR> <HR>
+<P><ADDRESS>
+Olivier Cappé / July 16, 1997
+</ADDRESS>
+</BODY>
+</HTML>

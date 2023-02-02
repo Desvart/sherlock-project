@@ -1,0 +1,245 @@
+% ----------------------------------- FUNCTION -------------------------------------------
+% 
+% Ipsum lorem
+% 
+% 
+% Inputs :
+%   -
+% 
+%   -
+% 
+%   -
+% 
+%   -
+% 
+% 
+% Outputs : 
+%   -
+% 
+%   -
+% 
+% --------------------------------------------------------------------------------------------------
+
+% ------------------------------------------------------------------------------------------------ %
+% Author    : Pitch Corp.
+% Date      : 
+% Copyright : Copyleft ;-)
+% ------------------------------------------------------------------------------------------------ %
+
+
+
+function [modelParameter, reductionMatrix, errorFlag] = training(trainingFilePath, trainingSNR, featureType, reductionParameter, model)
+    
+    errorFlag = 0;
+    
+    % ----------------------------------------------------------------------------------------------
+    % Features extraction
+    % ----------------------------------------------------------------------------------------------
+
+    if ~isstruct(trainingFilePath)
+        
+        %%% Extraction of raw features
+        [feature, target, nbTokenPerClass] = featureExtraction(trainingFilePath, trainingSNR, featureType);
+        
+    else
+        
+        %%% Feature are directly given to system for debugging purposes
+        [feature, target, nbTokenPerClass] = featureExtraction2(trainingFilePath);
+        
+    end
+
+    %%% Feature normalization
+    featureNormalized = featureNormalization(feature);
+
+    %%% Token's size reduction
+    [featureReduced, reductionMatrix] = reduceTokenDim(featureNormalized, reductionParameter);
+
+   
+    % ----------------------------------------------------------------------------------------------
+    % Features PDF modeling : compute model parameters
+    % ----------------------------------------------------------------------------------------------
+    
+    switch model(1),
+        
+        %%% Bayes
+        case 0, 
+            modelParameter = featurePDFModeling_Bayes(featureReduced, target, nbTokenPerClass);
+
+        %%% GMM
+        case 1,
+            try
+                modelParameter = featurePDFModeling_GMM(featureReduced, target, model(2));
+            catch exception
+                if strcmp(exception.identifier, 'stats:mvnpdf:BadCovariance'),
+                    modelParameter = 0;
+                    errorFlag = 1;
+                else
+                    error(exception.message);
+                end
+            end
+            
+        %%% HMM
+        case 2,
+            
+
+        otherwise,
+            error('Unknown model type.');
+    end
+    
+    
+end
+
+
+
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
+%                                  NESTED FUNCTION                                       %
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %
+
+
+
+% ----------------------------------- FUNCTION ----------------------------------------- %
+% 
+% Function : 
+% 
+% -------------------------------------------------------------------------------------- %
+
+function [feature, reductionMatrix] = reduceTokenDim(feature, reductionParameter)
+
+
+    % ----------------------------------------------------------------------------------------------
+    % Reduce tokens' dimension by a Principal Component Analysis (PCA)
+    % ----------------------------------------------------------------------------------------------
+    
+    if reductionParameter(1) ~= 0,
+        
+        % Compute the transformation matrix
+        reducedPCAMatrix = computeReducedPCAMatrix(feature, reductionParameter(1));
+        % Apply the transformation matrix on features
+        feature = reducedPCAMatrix * feature;
+        
+    else
+        
+        reducedPCAMatrix = [];
+        
+    end
+    
+    
+    % ----------------------------------------------------------------------------------------------
+    % Reduce tokens' dimension by a Linear Discriminant Analysis (LDA)
+    % ----------------------------------------------------------------------------------------------
+    
+    if reductionParameter(2) ~= 0,
+        
+        % Compute the transformation matrix
+        reducedLDAMatrix = computeReducedLDAMatrix(featureReduced, reductionParameter(2));
+        % Apply the transformation matrix on features
+        feature = reducedLDAMatrix * feature;
+        
+    else
+        
+        reducedLDAMatrix = [];
+        
+    end
+    
+
+    % ----------------------------------------------------------------------------------------------
+    % Transformation matrix are put in a cell to facilitated data manipulation
+    % ----------------------------------------------------------------------------------------------
+    
+    reductionMatrix{1} = reducedPCAMatrix;
+    reductionMatrix{2} = reducedLDAMatrix;
+
+end
+
+
+
+% ----------------------------------- FUNCTION ----------------------------------------- %
+% 
+% Function : 
+% 
+% -------------------------------------------------------------------------------------- %
+
+function reducedPCAMatrix = computeReducedPCAMatrix(feature, nbDimToKeep)
+
+    nbToken = size(feature, 2);
+    
+    
+    % ----------------------------------------------------------------------------------------------
+    % Compute covariance matrix of the feature matrix
+    % ----------------------------------------------------------------------------------------------
+    
+    covF = feature*feature'/(nbToken-1); 
+    
+    
+    % ----------------------------------------------------------------------------------------------
+    % Eigen analysis of feature covariance matrix
+    % ----------------------------------------------------------------------------------------------
+    
+    [eigenVector, eigenValue] = eig(covF);  
+    
+    
+    % ----------------------------------------------------------------------------------------------
+    % Normalize basis matrix
+    % ----------------------------------------------------------------------------------------------
+    
+    eigenValue = diag(eigenValue);
+    norm = diag(1./sqrt(eigenValue(end:-1:end-nbDimToKeep+1))); 
+%     norm = 1; % No normalization
+    
+
+    % ----------------------------------------------------------------------------------------------
+    % Compute reduced PCA transformation matrix
+    % ----------------------------------------------------------------------------------------------
+    
+    reducedPCAMatrix = norm*eigenVector(:, end:-1:end-nbDimToKeep+1)';
+
+end
+
+
+
+% ----------------------------------- FUNCTION ----------------------------------------- %
+% 
+% Function : 
+% 
+% -------------------------------------------------------------------------------------- %
+
+function reducedLDAMatrix = computeReducedLDAMatrix(feature, nbDimToKeep)
+
+    reducedLDAMatrix = 0;
+
+end
+
+
+
+% ----------------------------------- FUNCTION ----------------------------------------- %
+% 
+% Function : 
+% 
+% -------------------------------------------------------------------------------------- %
+
+function [feature, target, nbTokenPerClass] = featureExtraction2(trainingFilePath)
+
+    feature = trainingFilePath.data;
+    target  = trainingFilePath.target;
+    
+    nbClass = max(target);
+    nbTokenPerClass = zeros(1, nbClass);
+    for i = 1 : nbClass,
+        nbTokenPerClass(i) = sum(target == i);
+    end
+
+end
+
+
+
+
+% --------------------------------- End of file ------------------------------------------
+
+
+
+
+
+
+
+

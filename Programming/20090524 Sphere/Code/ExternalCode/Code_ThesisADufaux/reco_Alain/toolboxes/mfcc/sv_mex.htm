@@ -1,0 +1,214 @@
+<html>
+
+<head>
+<meta name="GENERATOR" content="Microsoft FrontPage 3.0">
+<title>Software - SV_mex</title>
+<meta name="Microsoft Theme" content="none">
+<meta name="Microsoft Border" content="t">
+</head>
+
+<body stylesrc="http://bunny/jialongsweb/software/templet.htm">
+<div align="center"><center>
+
+<table border="0" cellpadding="0" cellspacing="1" width="718">
+  <tr>
+    <td width="44"></td>
+    <td valign="bottom" width="658"><h1 align="center"><font color="#000080" face="Arial">SV_Mex<small><small><small><small><small><small>
+    &nbsp; </small></small></small></small></small></small><a
+    href="http://bunny.la.asu.edu/jialongsweb/download/SV_Mex.zip"><img
+    src="../images/DOWNLOAD.GIF" alt="DOWNLOAD.GIF (235 bytes)" WIDTH="20" HEIGHT="31"></a><br>
+    <small><small><small><small><small><small><a href="#LoadNIST">LoadNIST</a> | <a
+    href="#MFCC">MFCC</a> | <a href="#Gen_VQ">Gen_VQ</a> | <a href="#Gen_GMM">Gen_GMM</a> | <a
+    href="#Gen_CHMM">Gen_CHMM</a></small></small></small></small></small></small></font></h1>
+    </td>
+  </tr>
+  <tr>
+    <td width="44"></td>
+    <td valign="top" width="658"><h2><a name="LoadNIST"><font face="Arial" color="#0000FF"><strong><small>LoadNIST</small></strong></font></a></h2>
+    <blockquote>
+      <font FACE="Courier New" SIZE="2" COLOR="#228b22"><p></font><font face="Times New Roman"
+      size="3" color="#000000">Load a signal with SPHERE header into MATLAB. The signal can be
+      PCM and ULAW encoded, if compressed by SHORTEN, it will be automatically de-compressed.
+      The byte order can also be properly swapped depending on the current machine.</font></p>
+      <p><font face="Times New Roman" size="3" color="#000000">Usage: </font><font
+      face="Courier New"><font size="2" color="#008000">Sig = LoadNIST('FName');</font><font
+      size="3" color="#000000"> </font></font></p>
+      <p><font face="Times New Roman" size="3" color="#000000">Example: </font></p>
+    </blockquote>
+    <blockquote>
+      <blockquote>
+        <p><font size="2" face="Courier New" color="#008000">Sig = LoadNIST('sa1.wav');</font></p>
+      </blockquote>
+      <p><font face="Times New Roman" size="3" color="#000000">This command loads a signal from
+      the TIMIT database.</font></p>
+    </blockquote>
+    <h2><a name="MFCC"><font face="Arial" color="#0000FF"><strong><small>MFCC</small></strong></font></a></h2>
+    <blockquote>
+      <p><font face="Times New Roman">Calculate Mel-scaled FFT based cepstrum (MFCC) for a given
+      signal. MFCC parameters are given by a structure as below. The result is stored in a
+      structure with the field name &quot;Mat&quot;. <br>
+      <br>
+      Analysis parameters:</font></p>
+      <p><font face="Times New Roman">(1) </font><font face="Courier New" color="#008000"><small>Par.Order</small></font><font
+      face="Times New Roman"> : Number of MFCC coefficients.<br>
+      (2) </font><font face="Courier New" color="#008000"><small>Par.Delta</small></font><font
+      face="Times New Roman"> : 1-- MFCC and Delta MFCC, 0-- only MFCC.<br>
+      (3) </font><font face="Courier New" color="#008000"><small>Par.WinSz</small></font><font
+      face="Times New Roman"> : analysis window size.<br>
+      (4) </font><font face="Courier New" color="#008000"><small>Par.StpSz</small></font><font
+      face="Times New Roman"> : window shift step.<br>
+      (5) </font><font face="Courier New" color="#008000"><small>Par.SRate </small></font><font
+      face="Times New Roman">: sampling rate of signal.<br>
+      (6) </font><font face="Courier New" color="#008000"><small>Par.RmvSilence</small></font><font
+      face="Times New Roman"> : remove silence part, 1-- Yes, 0 -- No.<br>
+      <br>
+      Usage: </font><font face="Courier New" color="#008000"><small>Data = MFCC(Sig, Par);</small></font><font
+      face="Times New Roman"> <br>
+      <br>
+      Example:<br>
+      <br>
+      </font><font face="Courier New" color="#008000"><small>F_Par.Order = 2;</small></font><font
+      face="Times New Roman">&nbsp;&nbsp;&nbsp; % only two coefficients<br>
+      </font><font face="Courier New" color="#008000"><small>F_Par.Delta = 0;</small></font><font
+      face="Times New Roman">&nbsp;&nbsp;&nbsp; % No dynamic MFCC<br>
+      </font><font face="Courier New" color="#008000"><small>F_Par.WinSz = 256;<br>
+      F_Par.StpSz = 128;<br>
+      F_Par.SRate = 16000;<br>
+      F_Par.RmvSilence = 1;</small></font><font face="Times New Roman"> % remove silence part<br>
+      <br>
+      </font><font face="Courier New" color="#008000"><small>M(1) = MFCC(Sig, F_Par);</small></font><font
+      face="Times New Roman"><br>
+      <br>
+      Each row of </font><font face="Courier New" color="#008000"><small>M(1).Mat</small></font><font
+      face="Times New Roman"> is a feature vector.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+      </font></p>
+    </blockquote>
+    <h2><a name="Gen_VQ"><font face="Arial" color="#0000FF"><strong><small>Gen_VQ</small></strong></font></a></h2>
+    <blockquote>
+      <p><font face="Times New Roman">Generate a VQ codebook by the K-means algorithm.<br>
+      Training parameters are given by a structure defined as below:<br>
+      <br>
+      &nbsp;&nbsp;&nbsp; (1) </font><font face="Courier New" color="#008000"><small>Par.Size</small></font><font
+      face="Times New Roman"> : codebook size<br>
+      &nbsp;&nbsp;&nbsp; (2) </font><font face="Courier New" color="#008000"><small>Par.MaxIter</small></font><font
+      face="Times New Roman"> : maximum iterations <br>
+      &nbsp;&nbsp;&nbsp; (3) </font><font face="Courier New" color="#008000"><small>Par.RandSeed</small></font><font
+      face="Times New Roman"> : random seed;<br>
+      <br>
+      <br>
+      Usage: </font><font face="Courier New" color="#008000"><small>Model = Gen_VQ(Data, Par); </small></font><font
+      face="Times New Roman"><br>
+      <br>
+      Example:<br>
+      <br>
+      suppose </font><font face="Courier New" color="#008000"><small>Data(1).Mat, Data(2).Mat,
+      ....,</small></font><font face="Times New Roman"> contain training data,<br>
+      <br>
+      </font><font face="Courier New" color="#008000"><small>MyPar.Size = 8; <br>
+      MyPar.MaxIter = 20; <br>
+      MyPar.RandSeed = 1973;<br>
+      <br>
+      VQ = Gen_Vq(Data, MyPar);<br>
+      <br>
+      </small></font><font face="Times New Roman">Each row of </font><font face="Courier New"
+      color="#008000"><small>VQ.Mat </small></font><font face="Times New Roman">is a code
+      vector. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font></p>
+      <p>&nbsp;</p>
+    </blockquote>
+    <h2><a name="Gen_GMM"><font face="Arial" color="#0000FF"><strong><small>Gen_GMM</small></strong></font></a></h2>
+    <blockquote>
+      <p><font face="Times New Roman">Generate a Gaussian Mixture Model (GMM) by the EM
+      algorithm.<br>
+      <br>
+      Training parameters are defined as below:<br>
+      <br>
+      &nbsp;&nbsp;&nbsp; (1) </font><font face="Courier New" color="#008000"><small>Par.Size</small></font><font
+      face="Times New Roman"> : number of Gaussian functions<br>
+      &nbsp;&nbsp;&nbsp; (2) </font><font face="Courier New" color="#008000"><small>Par.MaxIter</small></font><font
+      face="Times New Roman"> : maximum iterations <br>
+      &nbsp;&nbsp;&nbsp; (3) </font><font face="Courier New" color="#008000"><small>Par.RandSeed</small></font><font
+      face="Times New Roman"> : random seed;<br>
+      <br>
+      <br>
+      Usage: </font><font face="Courier New" color="#008000"><small>Model = Gen_GMM(Data, Par); </small></font><font
+      face="Times New Roman"><br>
+      <br>
+      Example:<br>
+      <br>
+      suppose </font><font face="Courier New" color="#008000"><small>Data(1).Mat, Data(2).Mat,
+      ....,</small></font><font face="Times New Roman"> contain training data,<br>
+      <br>
+      </font><font face="Courier New" color="#008000"><small>MyPar.Size = 8; <br>
+      MyPar.MaxIter = 20; <br>
+      MyPar.RandSeed = 1973;<br>
+      <br>
+      GMM = Gen_GMM(Data, MyPar);<br>
+      <br>
+      GMM.MeanMat </small></font><font face="Times New Roman">contains mean vectors,<br>
+      </font><font face="Courier New" color="#008000"><small>GMM.VariMat </small></font><font
+      face="Times New Roman">contains variance vectors, <br>
+      </font><font face="Courier New" color="#008000"><small>GMM.WgtMat</small></font><font
+      face="Times New Roman"> contains mixture weigth. </font></p>
+    </blockquote>
+    <h2><a name="Gen_CHMM"><font face="Arial" color="#0000FF"><strong><small>Gen_CHMM</small></strong></font></a></h2>
+    <blockquote>
+      <p><font face="Times New Roman">Generate continuous density hidden Markov model (HMM).<br>
+      <br>
+      Training parameters are defined as below:<br>
+      <br>
+      &nbsp;&nbsp;&nbsp; (1) </font><font face="Courier New" color="#008000"><small>Par.Size</small></font><font
+      face="Times New Roman"> : number of Gaussian functions<br>
+      &nbsp;&nbsp;&nbsp; (2) </font><font face="Courier New" color="#008000"><small>Par.MaxIter</small></font><font
+      face="Times New Roman"> : maximum iterations <br>
+      &nbsp;&nbsp;&nbsp; (3) </font><font face="Courier New" color="#008000"><small>Par.RandSeed</small></font><font
+      face="Times New Roman"> : random seed<br>
+      &nbsp;&nbsp;&nbsp; (4) </font><font face="Courier New" color="#008000"><small>Par.NState</small></font><font
+      face="Times New Roman"> : number of states<br>
+      &nbsp;&nbsp;&nbsp; (5) </font><font face="Courier New" color="#008000"><small>Par.Conf</small></font><font
+      face="Times New Roman"> : model structure, <br>
+      &nbsp;&nbsp;&nbsp;&nbsp; e.g. three states left-to-right [1, 1, 0; 0, 1, 1; 0, 0, 1];<br>
+      <br>
+      <br>
+      Usage: </font><font face="Courier New" color="#008000"><small>Model = Gen_CHMM(Data, Par);
+      </small></font><font face="Times New Roman"><br>
+      <br>
+      Example:<br>
+      <br>
+      suppose </font><font face="Courier New" color="#008000"><small>Data(1).Mat, Data(2).Mat,
+      ....</small></font><font face="Times New Roman">, contain training data,<br>
+      <br>
+      </font><font face="Courier New" color="#008000"><small>MyPar.Size = 8; <br>
+      MyPar.MaxIter = 20; <br>
+      MyPar.RandSeed = 1973;<br>
+      MyPar.NState = 3;<br>
+      MyPar.Conf = [1, 1, 1; 1, 1, 1; 1, 1, 1]</small></font><font face="Times New Roman"> %
+      allow any transion<br>
+      <br>
+      </font><font face="Courier New" color="#008000"><small>HMM = Gen_CHMM(Data, MyPar);<br>
+      <br>
+      HMM.Tran </small></font><font face="Times New Roman">: transition matrix
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+      </font><font face="Courier New" color="#008000"><small>HMM.MeanMat</small></font><font
+      face="Times New Roman"> : mixture mean vectors
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+      </font><font face="Courier New" color="#008000"><small>HMM.VariMat</small></font><font
+      face="Times New Roman"> : mixture variance vectors
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+      </font><font face="Courier New" color="#008000"><small>HMM.WgtVec </small></font><font
+      face="Times New Roman">: mixture weight<br>
+      </font></p>
+    </blockquote>
+    <hr>
+    <p><strong><font face="Arial"><small><a href="../softwares.htm">Software</a> | <a
+    href="../C_lib.htm">SV_Lib</a> | <font color="#800000"><a href="../GVQ.htm">GVQ</a></font></small></font></strong></td>
+  </tr>
+  <tr>
+    <td width="44"></td>
+    <td valign="top" width="658"></td>
+  </tr>
+</table>
+</center></div>
+
+<p>&nbsp; </p>
+</body>
+</html>

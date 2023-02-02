@@ -1,0 +1,14 @@
+-Input Buttons
+Button 1: Open Data file (.mat) or (.tif)
+Button 2: Draw Gaussian Data with Mouse
+             Left mbutton   = Draw
+             Right mbutton  = Jump a point
+             Return key     = Finish
+
+-Operational Buttons
+Button 3: Start GMM modeling
+Button 4: Stop GMM modeling
+
+-Output Button
+Button 5: Save GMM parameters as a .mat file
+           

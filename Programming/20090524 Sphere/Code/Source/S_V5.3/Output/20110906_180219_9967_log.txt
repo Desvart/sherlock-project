@@ -1,0 +1,62 @@
+STATISTICAL PATTERN RECOGNITION TOOLBOX
+18:02:19, 06/09/2011
+Execution time : 00:00:08
+
+------- CONFIGURATION -------
+
+Database used:  			Mathematical features (see 'config.mat' for details)
+
+Feature reduction : 			PCA : 3, LDA : 0
+
+Strategy used : 			0.75 (nTraining : 3, random : 1)
+
+------- LEARNING RESULTS -------
+
+--- Training 1
+#    FileId ClassId Membership Certainties Result
+#  1:   6 	 1 	 0 	 0.00 	 false
+#  2:   8 	 1 	 0 	 0.00 	 false
+#  3:  13 	 1 	 0 	 0.00 	 false
+#  4:  16 	 1 	 0 	 0.00 	 false
+#  5:  19 	 1 	 0 	 0.00 	 false
+#  6:  22 	 2 	 0 	 0.00 	 false
+#  7:  28 	 2 	 0 	 0.00 	 false
+#  8:  29 	 2 	 0 	 0.00 	 false
+#  9:  30 	 2 	 0 	 0.00 	 false
+# 10:  32 	 2 	 0 	 0.00 	 false
+# 11:  37 	 2 	 0 	 0.00 	 false
+# 12:  44 	 2 	 0 	 0.00 	 false
+# 13:  51 	 3 	 0 	 0.00 	 false
+# 14:  54 	 3 	 0 	 0.00 	 false
+--- Training 2
+#    FileId ClassId Membership Certainties Result
+#  1:   3 	 1 	 0 	 0.00 	 false
+#  2:   5 	 1 	 0 	 0.00 	 false
+#  3:   9 	 1 	 0 	 0.00 	 false
+#  4:  11 	 1 	 0 	 0.00 	 false
+#  5:  18 	 1 	 0 	 0.00 	 false
+#  6:  23 	 2 	 0 	 0.00 	 false
+#  7:  29 	 2 	 0 	 0.00 	 false
+#  8:  34 	 2 	 0 	 0.00 	 false
+#  9:  39 	 2 	 0 	 0.00 	 false
+# 10:  41 	 2 	 0 	 0.00 	 false
+# 11:  45 	 2 	 0 	 0.00 	 false
+# 12:  49 	 2 	 0 	 0.00 	 false
+# 13:  51 	 3 	 0 	 0.00 	 false
+# 14:  52 	 3 	 0 	 0.00 	 false
+--- Training 3
+#    FileId ClassId Membership Certainties Result
+#  1:   2 	 1 	 0 	 0.00 	 false
+#  2:   5 	 1 	 0 	 0.00 	 false
+#  3:  10 	 1 	 0 	 0.00 	 false
+#  4:  13 	 1 	 0 	 0.00 	 false
+#  5:  20 	 1 	 0 	 0.00 	 false
+#  6:  24 	 2 	 0 	 0.00 	 false
+#  7:  31 	 2 	 0 	 0.00 	 false
+#  8:  32 	 2 	 0 	 0.00 	 false
+#  9:  36 	 2 	 0 	 0.00 	 false
+# 10:  38 	 2 	 0 	 0.00 	 false
+# 11:  41 	 2 	 0 	 0.00 	 false
+# 12:  47 	 2 	 0 	 0.00 	 false
+# 13:  56 	 3 	 0 	 0.00 	 false
+# 14:  58 	 3 	 0 	 0.00 	 false

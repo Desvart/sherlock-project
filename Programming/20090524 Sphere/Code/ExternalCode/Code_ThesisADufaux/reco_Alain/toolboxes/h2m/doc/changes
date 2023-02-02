@@ -1,0 +1,48 @@
+Version 1.0 (Mar 24, 1997):
+___________________________
+Corresponds to the original mfiles (no version number).
+
+
+Version 1.1 (May 23, 1997):
+___________________________
+In hmm_fb the scaling procedure was modified to fix a bug:
+
+1) Scaling is performed also when the forward variable becomes too big. In fact
+when the original  data is "small", the  forward variable tends to infinity and
+not to zero: this could cause overflows in the original version of hmm_fb.
+
+2) The backward variable at time t is scaled by  the scale factor found for the
+forward variables at  time  T+1-t (hence the  flipud  operation). This  is just
+because using the same scale factors is a good idea since we only need to store
+one value for logscale that can be used to compute the likelihood both from the
+forward  or  backward variables, however  it  is safer to   use the  same scale
+factors for comparable numbers of iterations.
+
+BEWARE THIS IS ACTUALLY A BUG (see below).
+
+
+Version 1.2  (June  17, 1997):
+______________________________
+The computation  of gaussian density values  was performed by   a piece of code
+that was duplicated in many function. This now  forms a new function gauseval.m
+(and gauslogv.m  which  does the same  thing in  log). hmm_fb.m, mix_post.m and
+hmm_vit.m have been modified to take this into account. User of MATLAB compiler
+should compile gauseval.m  and  gauslogv.m because  it saves  much time.    The
+mex-file c_dgaus.c still  exists but is usefull  only for people who don't  use
+the compiler (note that the  existence of c_dgaus.mex   is now only checked  in
+gauseval.m).
+
+
+Version 1.3   (July  16, 1997):
+_______________________________
+In hmm_fb, the scaling is now performed at each  step to avoid uneeded troubles
+(this only  slightly slows down the  computation). Version 1.1 introduced a bug
+(!)  which has been corrected: using the same scale factors (in hmm_fb) for the
+alpha and the beta is needed for the transition matrix reestimation formulas to
+be correct.
+
+An important error was corrected  in gauseval and  gauslogv (the version 1.2 of
+these functions yielded incorrect results in the case of scalar observations).
+
+multgen is now  called randindx.  There is a  new function called hmm_psim.  vq
+can now be used in the case of scalar observations as well.

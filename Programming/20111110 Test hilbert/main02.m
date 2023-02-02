@@ -1,0 +1,538 @@
+
+close all;
+clear all;
+clc;
+
+
+fs      = 200e3;  %kHz
+d       = 0.25;      %s
+nSignal = d * fs; %S
+
+
+%% Test 1.1 : sinus @ f = 500 Hz = cst
+%  Test 1.2 : sinus @ f = 25 kHz = cst
+%  Test 1.3 : sinus @ f = 50 kHz = cst
+%  Test 1.4 : sinus @ f = 99 kHz = cst
+
+A = 5;
+f = [500, 25e3, 50e3, 99e3];
+t = (0:nSignal-1)/fs;
+
+figure('color', 'white', 'name', 'A*sin(w*t), A = cst, w = cst');
+
+nTest = length(f);
+signal = zeros(nTest, nSignal);
+dft    = zeros(nTest, floor(nSignal/2)+1);
+hilb   = zeros(nTest, nSignal);
+env    = zeros(nTest, nSignal);
+fInst  = zeros(nTest, nSignal);
+for iSignal = 1 : nTest,
+    signal(iSignal, :) = A*sin(2*pi*f(iSignal)*t);
+    [dft(iSignal, :), fAxis] = dft_(signal(iSignal, :), fs);
+    
+    hilb(iSignal, :) = hilbert(signal(iSignal, :));
+    env(iSignal, :)  = abs(hilb(iSignal, :));
+    fInst(iSignal, :)= [0, angle(hilb(iSignal, 2:nSignal).*conj(hilb(iSignal, 1:nSignal-1))) * fs/(2*pi)];
+    
+    
+    subplot(nTest,3,(iSignal-1)*3+1); hold on;
+    plot(t, signal(iSignal, :));
+    plot(t, env(iSignal, :), 'r');
+    axis tight;
+    ylim([min(signal(iSignal, :))*1.1, max(signal(iSignal, :))*1.1]);
+    xlabel('Time [ms]');
+    ylabel('Amplitude [-]');
+    title(sprintf('Raw signal : Sine @ %3.1f kHz + envelopp', f(iSignal)/1e3));
+    
+    subplot(nTest,3,(iSignal-1)*3+2); hold on;
+    stem(fAxis/1e3, dft(iSignal, :));
+    plot(fInst(iSignal,2)/1e3, env(iSignal, 2), '*r');
+    axis tight;
+    xlabel('Frequency [kHz]');
+    ylabel('Magnitude [-]');
+    title('Signal spectrum');
+    
+    subplot(nTest,3,(iSignal-1)*3+3); hold on;
+    plot(t, f(iSignal)*ones(1, nSignal)/1e3);
+    plot(t, fInst(iSignal, :)/1e3, '--r');
+    axis tight;
+    ylim([0, max(fInst(iSignal, :))*1.1/1e3]);
+    xlabel('Time [ms]');
+    ylabel('Frequency [kHz]');
+    title('Signal Instantaneous Frequency');
+    
+    
+end
+
+clear all;
+fs      = 200e3;  %kHz
+d       = 0.25;      %s
+nSignal = d * fs; %S
+
+
+
+%% Test 2.1 : sinus + DC @ f = 500 Hz = cst
+%  Test 2.2 : sinus + DC @ f = 25 kHz = cst
+%  Test 2.3 : sinus + DC @ f = 50 kHz = cst
+%  Test 2.4 : sinus + DC @ f = 99 kHz = cst
+
+A = 1;
+f = [500, 25e3, 50e3, 99e3];
+t = (0:nSignal-1)/fs;
+
+figure('color', 'white', 'name', 'A*sin(w*t) + B, A = cst, w = cst, B = cst');
+
+nTest = length(f);
+signal = zeros(nTest, nSignal);
+dft    = zeros(nTest, floor(nSignal/2)+1);
+hilb   = zeros(nTest, nSignal);
+env    = zeros(nTest, nSignal);
+fInst  = zeros(nTest, nSignal);
+for iSignal = 1 : nTest,
+    signal(iSignal, :) = A*sin(2*pi*f(iSignal)*t) + 5;
+    [dft(iSignal, :), fAxis] = dft_(signal(iSignal, :), fs);
+    
+    hilb(iSignal, :) = hilbert(signal(iSignal, :));
+    env(iSignal, :)  = abs(hilb(iSignal, :));
+    fInst(iSignal, :)= [0, angle(hilb(iSignal, 2:nSignal).*conj(hilb(iSignal, 1:nSignal-1))) * fs/(2*pi)];
+    
+    
+    subplot(nTest,3,(iSignal-1)*3+1); hold on;
+    plot(t, signal(iSignal, :));
+    plot(t, env(iSignal, :), 'r');
+    axis tight;
+    ylim([min(signal(iSignal, :))*1.1, max(signal(iSignal, :))*1.1]);
+    xlabel('Time [ms]');
+    ylabel('Amplitude [-]');
+    title(sprintf('Raw signal : Sine @ %3.1f kHz + envelopp', f(iSignal)/1e3));
+    
+    subplot(nTest,3,(iSignal-1)*3+2); hold on;
+    stem(fAxis/1e3, dft(iSignal, :));
+    plot(fInst(iSignal,2)/1e3, 1, '*r');
+    axis tight;
+    xlabel('Frequency [kHz]');
+    ylabel('Magnitude [-]');
+    title('Signal spectrum');
+    
+    subplot(nTest,3,(iSignal-1)*3+3); hold on;
+    plot(t, f(iSignal)*ones(1, nSignal)/1e3);
+    plot(t, fInst(iSignal, :)/1e3, '--r');
+    axis tight;
+    ylim([0, max(fInst(iSignal, :))*1.1/1e3]);
+    xlabel('Time [ms]');
+    ylabel('Frequency [kHz]');
+    title('Signal Instantaneous Frequency');
+    
+    
+end
+
+
+
+%% Test 3 : chirp @ f = 500 Hz - 50 kHz
+
+A = 1;
+fRes = (50e3-500)/nSignal;
+f = 500:fRes:50e3-fRes;
+t = (0:nSignal-1)/fs;
+
+figure('color', 'white', 'name', 'Chirp : A*sin(w*t), A = cst, w = [500:50e3] lin.');
+
+nTest = 1;
+signal = zeros(nTest, nSignal);
+dft    = zeros(nTest, floor(nSignal/2)+1);
+hilb   = zeros(nTest, nSignal);
+env    = zeros(nTest, nSignal);
+fInst  = zeros(nTest, nSignal);
+for iSignal = 1 : nTest,
+    signal(iSignal, :) = A*sin(pi*f.*t);
+    [stdft, tAxis, fAxis] = stdft_(signal(iSignal, :), sqrt(hann(512, 'periodic')), 1/4, fs);
+    
+    hilb(iSignal, :) = hilbert(signal(iSignal, :));
+    env(iSignal, :)  = abs(hilb(iSignal, :));
+    fInst(iSignal, :)= [0, angle(hilb(iSignal, 2:nSignal).*conj(hilb(iSignal, 1:nSignal-1))) * fs/(2*pi)];
+    
+    
+    subplot(nTest,3,(iSignal-1)*3+1); hold on;
+    plot(t, signal(iSignal, :));
+    plot(t, env(iSignal, :), 'r');
+    axis tight;
+    ylim([min(signal(iSignal, :))*1.1, max(signal(iSignal, :))*1.1]);
+    xlabel('Time [ms]');
+    ylabel('Amplitude [-]');
+    title(sprintf('Raw signal : Chirp @ %3.1f kHz - %3.0f kHz + envelopp', f(1)/1e3, f(end)/1e3));
+    
+    subplot(nTest,3,(iSignal-1)*3+2); hold on;
+    mesh(tAxis*1e3, fAxis/1e3, stdft); shading flat;
+    axis tight;
+    xlabel('Time [ms]');
+    ylabel('Frequency [kHz]');
+    title('Signal spectrum');
+    
+    subplot(nTest,3,(iSignal-1)*3+3); hold on;
+    plot(t, f/1e3);
+    plot(t, fInst(iSignal, :)/1e3, '--r');
+    axis tight;
+    ylim([0, max(fInst(iSignal, :))*1.1/1e3]);
+    xlabel('Time [ms]');
+    ylabel('Frequency [kHz]');
+    title('Signal Instantaneous Frequency');
+    
+    
+end
+
+
+%% Test 4 : sin + cos @ 25 kHz & A = B = cst
+
+A = 5;
+f = [25e3];
+t = (0:nSignal-1)/fs;
+
+figure('color', 'white', 'name', 'A*sin(w*t) + A*cos(w*t), A = cst, w = cst');
+
+nTest = length(f);
+signal = zeros(nTest, nSignal);
+dft    = zeros(nTest, floor(nSignal/2)+1);
+hilb   = zeros(nTest, nSignal);
+env    = zeros(nTest, nSignal);
+fInst  = zeros(nTest, nSignal);
+for iSignal = 1 : nTest,
+    signal(iSignal, :) = A*sin(2*pi*f(iSignal)*t) + A*cos(2*pi*f(iSignal)*t);
+    [dft(iSignal, :), fAxis] = dft_(signal(iSignal, :), fs);
+    
+    hilb(iSignal, :) = hilbert(signal(iSignal, :));
+    env(iSignal, :)  = abs(hilb(iSignal, :));
+    fInst(iSignal, :)= [0, angle(hilb(iSignal, 2:nSignal).*conj(hilb(iSignal, 1:nSignal-1))) * fs/(2*pi)];
+    
+    
+    subplot(nTest,3,(iSignal-1)*3+1); hold on;
+    plot(t, signal(iSignal, :));
+    plot(t, env(iSignal, :), 'r');
+    axis tight;
+    ylim([min(signal(iSignal, :))*1.1, max(signal(iSignal, :))*1.1]);
+    xlabel('Time [ms]');
+    ylabel('Amplitude [-]');
+    title(sprintf('Raw signal : Sine @ %3.1f kHz + envelopp', f(iSignal)/1e3));
+    
+    subplot(nTest,3,(iSignal-1)*3+2); hold on;
+    stem(fAxis/1e3, dft(iSignal, :));
+    plot(fInst(iSignal,2)/1e3, env(iSignal, 2), '*r');
+    axis tight;
+    xlabel('Frequency [kHz]');
+    ylabel('Magnitude [-]');
+    title('Signal spectrum');
+    
+    subplot(nTest,3,(iSignal-1)*3+3); hold on;
+    plot(t, f(iSignal)*ones(1, nSignal)/1e3);
+    plot(t, fInst(iSignal, :)/1e3, '--r');
+    axis tight;
+    ylim([0, max(fInst(iSignal, :))*1.1/1e3]);
+    xlabel('Time [ms]');
+    ylabel('Frequency [kHz]');
+    title('Signal Instantaneous Frequency');
+    
+    
+end
+
+clear all;
+fs      = 200e3;  %kHz
+d       = 0.25;      %s
+nSignal = d * fs; %S
+
+
+%% Test 5 : sin + cos @ 25 kHz & A ~= B
+
+A = 5;
+B = 9;
+f = [25e3];
+t = (0:nSignal-1)/fs;
+
+figure('color', 'white', 'name', 'A*sin(w*t) + B*cos(w*t), A = cst, B = cst ~= A, w = cst');
+
+nTest = length(f);
+signal = zeros(nTest, nSignal);
+dft    = zeros(nTest, floor(nSignal/2)+1);
+hilb   = zeros(nTest, nSignal);
+env    = zeros(nTest, nSignal);
+fInst  = zeros(nTest, nSignal);
+for iSignal = 1 : nTest,
+    signal(iSignal, :) = A*sin(2*pi*f(iSignal)*t) + B*cos(2*pi*f(iSignal)*t);
+    [dft(iSignal, :), fAxis] = dft_(signal(iSignal, :), fs);
+    
+    hilb(iSignal, :) = hilbert(signal(iSignal, :));
+    env(iSignal, :)  = abs(hilb(iSignal, :));
+    fInst(iSignal, :)= [0, angle(hilb(iSignal, 2:nSignal).*conj(hilb(iSignal, 1:nSignal-1))) * fs/(2*pi)];
+    
+    
+    subplot(nTest,3,(iSignal-1)*3+1); hold on;
+    plot(t, signal(iSignal, :));
+    plot(t, env(iSignal, :), 'r');
+    axis tight;
+    ylim([min(signal(iSignal, :))*1.1, max(signal(iSignal, :))*1.1]);
+    xlabel('Time [ms]');
+    ylabel('Amplitude [-]');
+    title(sprintf('Raw signal : Sine @ %3.1f kHz + envelopp', f(iSignal)/1e3));
+    
+    subplot(nTest,3,(iSignal-1)*3+2); hold on;
+    stem(fAxis/1e3, dft(iSignal, :));
+    plot(fInst(iSignal,2)/1e3, env(iSignal, 2), '*r');
+    axis tight;
+    xlabel('Frequency [kHz]');
+    ylabel('Magnitude [-]');
+    title('Signal spectrum');
+    
+    subplot(nTest,3,(iSignal-1)*3+3); hold on;
+    plot(t, f(iSignal)*ones(1, nSignal)/1e3);
+    plot(t, fInst(iSignal, :)/1e3, '--r');
+    axis tight;
+    ylim([0, max(fInst(iSignal, :))*1.1/1e3]);
+    xlabel('Time [ms]');
+    ylabel('Frequency [kHz]');
+    title('Signal Instantaneous Frequency');
+    
+    
+end
+
+clear all;
+fs      = 200e3;  %kHz
+d       = 0.25;      %s
+nSignal = d * fs; %S
+
+%% Test 6 : sin @ 25 kHz + cos @ 50 kHz & A = B = CST
+
+A = 1;
+B = A;
+f = [10];
+t = (0:nSignal-1)/fs;
+
+figure('color', 'white', 'name', 'A*sin(w1*t) + A*cos(w2*t), A = cst, w1 = cst, w2 = cst ~= w1');
+
+nTest = length(f);
+signal = zeros(nTest, nSignal);
+dft    = zeros(nTest, floor(nSignal/2)+1);
+hilb   = zeros(nTest, nSignal);
+env    = zeros(nTest, nSignal);
+fInst  = zeros(nTest, nSignal);
+for iSignal = 1 : nTest,
+    signal(iSignal, :) = A*sin(2*pi*f(iSignal)*t) + B*cos(2*pi*100*f(iSignal)*t);
+    [dft(iSignal, :), fAxis] = dft_(signal(iSignal, :), fs);
+    
+    hilb(iSignal, :) = hilbert(signal(iSignal, :));
+    env(iSignal, :)  = abs(hilb(iSignal, :));
+    fInst(iSignal, :)= [0, angle(hilb(iSignal, 2:nSignal).*conj(hilb(iSignal, 1:nSignal-1))) * fs/(2*pi)];
+    
+    
+    subplot(nTest,3,(iSignal-1)*3+1); hold on;
+    plot(t, signal(iSignal, :));
+    plot(t, env(iSignal, :), 'r');
+    axis tight;
+    ylim([min([signal(iSignal, :)*1.1, env(iSignal, :)*1.1])*1.1, max([signal(iSignal, :)*1.1, env(iSignal, :)*1.1])]);
+    xlabel('Time [ms]');
+    ylabel('Amplitude [-]');
+    title(sprintf('Raw signal : Sine @ %3.1f kHz + envelopp', f(iSignal)/1e3));
+    
+    subplot(nTest,3,(iSignal-1)*3+2); hold on;
+    stem(fAxis/1e3, dft(iSignal, :));
+    plot(fInst(iSignal,2)/1e3, env(iSignal, 2), '*r');
+    axis tight;
+    xlabel('Frequency [kHz]');
+    ylabel('Magnitude [-]');
+    title('Signal spectrum');
+    
+    subplot(nTest,3,(iSignal-1)*3+3); hold on;
+    plot(t, fInst(iSignal, :)/1e3, 'r');
+    plot(t, f(iSignal)*ones(1, nSignal)/1e3, '--');
+    axis tight;
+    ylim([0, max(fInst(iSignal, :))*1.1/1e3]);
+    xlabel('Time [ms]');
+    ylabel('Frequency [kHz]');
+    title('Signal Instantaneous Frequency');
+    
+    
+end
+
+clear all;
+fs      = 200e3;  %kHz
+d       = 0.25;      %s
+nSignal = d * fs; %S
+
+
+%% Test 7 : A[n]*sin @ 25 kHz A[n] = cos @ 10 Hz.
+
+A = 1;
+B = A;
+f = [25e3];
+t = (0:nSignal-1)/fs;
+
+figure('color', 'white', 'name', 'A*sin(w1*t), A = cos(w2*t), w1 = cst, w2 = cst ~= w1');
+
+nTest = length(f);
+signal = zeros(nTest, nSignal);
+dft    = zeros(nTest, floor(nSignal/2)+1);
+hilb   = zeros(nTest, nSignal);
+env    = zeros(nTest, nSignal);
+fInst  = zeros(nTest, nSignal);
+for iSignal = 1 : nTest,
+    A = 1*cos(2*pi*10*t);
+    signal(iSignal, :) = A.*sin(2*pi*f(iSignal)*t);
+    [dft(iSignal, :), fAxis] = dft_(signal(iSignal, :), fs);
+    
+    hilb(iSignal, :) = hilbert(signal(iSignal, :));
+    env(iSignal, :)  = abs(hilb(iSignal, :));
+    fInst(iSignal, :)= [0, angle(hilb(iSignal, 2:nSignal).*conj(hilb(iSignal, 1:nSignal-1))) * fs/(2*pi)];
+    
+    
+    subplot(nTest,3,(iSignal-1)*3+1); hold on;
+    plot(t, signal(iSignal, :));
+    plot(t, env(iSignal, :), 'r');
+    axis tight;
+    ylim([min([signal(iSignal, :)*1.1, env(iSignal, :)*1.1])*1.1, max([signal(iSignal, :)*1.1, env(iSignal, :)*1.1])]);
+    xlabel('Time [ms]');
+    ylabel('Amplitude [-]');
+    title(sprintf('Raw signal : Sine @ %3.1f kHz + envelopp', f(iSignal)/1e3));
+    
+    subplot(nTest,3,(iSignal-1)*3+2); hold on;
+    stem(fAxis/1e3, dft(iSignal, :));
+    plot(fInst(iSignal,2)/1e3, env(iSignal, 2), '*r');
+    axis tight;
+    xlabel('Frequency [kHz]');
+    ylabel('Magnitude [-]');
+    title('Signal spectrum');
+    
+    subplot(nTest,3,(iSignal-1)*3+3); hold on;
+    plot(t, fInst(iSignal, :)/1e3, 'r');
+    plot(t, f(iSignal)*ones(1, nSignal)/1e3, '--');
+    axis tight;
+    ylim([0, max(fInst(iSignal, :))*1.1/1e3]);
+    xlabel('Time [ms]');
+    ylabel('Frequency [kHz]');
+    title('Signal Instantaneous Frequency');
+    
+    
+end
+
+clear all;
+fs      = 200e3;  %kHz
+d       = 0.25;      %s
+nSignal = d * fs; %S
+
+
+
+%% Test 7 : A[n]*sin @ 500 Hz - 50 kHz, A[n] = cos @ 10 Hz.
+
+A = 1;
+B = 2;
+fRes = (50e3-500)/nSignal;
+f = 500:fRes:50e3-fRes;
+t = (0:nSignal-1)/fs;
+
+figure('color', 'white', 'name', 'A*cos(w1*t), A = 5+100*t+2*cos(w2*t), w1 = cst, w2 = cst ~= w1');
+
+nTest = length(1);
+signal = zeros(nTest, nSignal);
+dft    = zeros(nTest, floor(nSignal/2)+1);
+hilb   = zeros(nTest, nSignal);
+env    = zeros(nTest, nSignal);
+fInst  = zeros(nTest, nSignal);
+for iSignal = 1 : nTest,
+    A = 5+t*100+2*cos(2*pi*10*t);
+    signal(iSignal, :) = A.*cos(pi*f.*t);
+    [stdft, tAxis, fAxis] = stdft_(signal(iSignal, :), sqrt(hann(512, 'periodic')), 1/4, fs);
+    
+    hilb(iSignal, :) = hilbert(signal(iSignal, :));
+    env(iSignal, :)  = abs(hilb(iSignal, :));
+    fInst(iSignal, :)= [0, angle(hilb(iSignal, 2:nSignal).*conj(hilb(iSignal, 1:nSignal-1))) * fs/(2*pi)];
+    
+    
+    subplot(nTest,3,(iSignal-1)*3+1); hold on;
+    plot(t, signal(iSignal, :));
+    plot(t, env(iSignal, :), 'r');
+    axis tight;
+    ylim([min([signal(iSignal, :)*1.1, env(iSignal, :)*1.1])*1.1, max([signal(iSignal, :)*1.1, env(iSignal, :)*1.1])]);
+    xlabel('Time [ms]');
+    ylabel('Amplitude [-]');
+    title(sprintf('Raw signal : Sine @ %3.1f kHz + envelopp', f(iSignal)/1e3));
+    
+    subplot(nTest,3,(iSignal-1)*3+2); hold on;
+    mesh(tAxis*1e3, fAxis/1e3, stdft); shading flat;
+    axis tight;
+    xlabel('Time [ms]');
+    ylabel('Frequency [kHz]');
+    title('Signal spectrum');
+    
+    subplot(nTest,3,(iSignal-1)*3+3); hold on;
+    plot(t, fInst(iSignal, :)/1e3, 'r');
+    plot(t, f/1e3, '--');
+    axis tight;
+    ylim([0, max(fInst(iSignal, :))*1.1/1e3]);
+    xlabel('Time [ms]');
+    ylabel('Frequency [kHz]');
+    title('Signal Instantaneous Frequency');
+    
+    
+end
+
+clear all;
+fs      = 200e3;  %kHz
+d       = 1;      %s
+nSignal = d * fs; %S
+
+
+%% Test 7 : A[n]*sin @ 500 Hz - 50 kHz, A[n] = cos @ 10 Hz.
+
+A = 1;
+B = 2;
+fRes = (50e3-500)/nSignal;
+f = 500:fRes:50e3-fRes;
+
+t = (0:nSignal-1)/fs;
+Z = (1-2^t(end))/(500-50e3);
+f = Z*(2.^(t)-1)+500;
+f = (50e3-500)/t(end)^2 * t.^2 + 500;
+
+figure('color', 'white', 'name', 'A*sin(w1*t), A = cos(w2*t), w1 = cst, w2 = [500, 50e3], square');
+
+nTest = length(1);
+signal = zeros(nTest, nSignal);
+dft    = zeros(nTest, floor(nSignal/2)+1);
+hilb   = zeros(nTest, nSignal);
+env    = zeros(nTest, nSignal);
+fInst  = zeros(nTest, nSignal);
+for iSignal = 1 : nTest,
+    A = 5+t*100+2*cos(2*pi*10*t);
+    signal(iSignal, :) = A.*cos(pi*f.*t);
+    [stdft, tAxis, fAxis] = stdft_(signal(iSignal, :), sqrt(hann(512, 'periodic')), 1/4, fs);
+    
+    hilb(iSignal, :) = hilbert(signal(iSignal, :));
+    env(iSignal, :)  = abs(hilb(iSignal, :));
+%     fInst(iSignal, :)= [0, diff(unwrap(angle(hilb(iSignal, :))))./diff(t) /(2*pi)];
+    fInst(iSignal, :)= [0, angle(hilb(iSignal, 2:nSignal).*conj(hilb(iSignal, 1:nSignal-1))) * fs/(2*pi)];
+    
+    
+    subplot(nTest,3,(iSignal-1)*3+1); hold on;
+    plot(t, signal(iSignal, :));
+    plot(t, env(iSignal, :), 'r');
+    axis tight;
+    ylim([min([signal(iSignal, :)*1.1, env(iSignal, :)*1.1])*1.1, max([signal(iSignal, :)*1.1, env(iSignal, :)*1.1])]);
+    xlabel('Time [ms]');
+    ylabel('Amplitude [-]');
+    title(sprintf('Raw signal : Sine @ %3.1f kHz + envelopp', f(iSignal)/1e3));
+    
+    subplot(nTest,3,(iSignal-1)*3+2); hold on;
+    mesh(tAxis*1e3, fAxis/1e3, stdft); shading flat;
+    axis tight;
+    xlabel('Time [ms]');
+    ylabel('Frequency [kHz]');
+    title('Signal spectrum');
+    
+    subplot(nTest,3,(iSignal-1)*3+3); hold on;
+    plot(t, fInst(iSignal, :)/1e3, 'r');
+    plot(t, f*3/2/1e3-0.250, '--');
+    axis tight;
+    ylim([0, max(fInst(iSignal, :))*1.1/1e3]);
+    xlabel('Time [ms]');
+    ylabel('Frequency [kHz]');
+    title('Signal Instantaneous Frequency');
+    
+    
+end
+

@@ -1,0 +1,30 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Other functions</TITLE>
+<META NAME="description" CONTENT="Other functions">
+<META NAME="keywords" CONTENT="h2m">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="h2m.css">
+</HEAD>
+<BODY LANG="EN" >
+ <B> Next:</B> <A NAME="tex2html180" HREF="node14.html">List of functions</A>
+<B>Up:</B> <A NAME="tex2html178" HREF="h2m.html">h2m : MATLAB functions </A>
+<B> Previous:</B> <A NAME="tex2html172" HREF="node12.html">Computation time and memory </A>
+<BR> <P>
+<H1><A NAME="SECTION00070000000000000000">Other functions</A></H1>
+<P>
+The functions <code>hmm_gen</code> and <code>mix_gen</code> generate data vectors according to a given model. This is useful for testing algorithms on ``prototype data''. <code>hmm_psim</code> generates a random sequence of HMM state conditional to an observation sequence. This can be used for doing Monte-Carlo simulations (the way it works is described, for instance, in [<A HREF="node16.html#Carter:GibbsState">5</A>] as ``sampling the indicator variables'').
+<P>
+<code>gauseval</code> and <code>gauslogv</code> computes values of the Gaussian probability density (or the logarithm of it for <code>gauslogv</code>) for several Gaussian distributions and several observed vectors at the same time. Computing as many values as possible at the same time is much faster than calling the function several times (especially when the number of Gaussian distributions is large).
+<P>
+<code>gauselps</code> plots the 2-D projections of the Gaussian ellipsoids corresponding to the Gaussian distribution (this is certainly one of the most useful things in order to see what's going on, at least for low dimensional models).
+<P>
+<BR> <HR>
+<P><ADDRESS>
+Olivier Cappé / July 16, 1997
+</ADDRESS>
+</BODY>
+</HTML>

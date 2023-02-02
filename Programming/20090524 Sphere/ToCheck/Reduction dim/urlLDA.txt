@@ -1,0 +1,8 @@
+http://en.wikipedia.org/wiki/Linear_discriminant_analysis
+http://www2.ece.ohio-state.edu/~aleix/pami01.pdf
+http://people.revoledu.com/kardi/tutorial/LDA/LDA.html
+http://people.revoledu.com/kardi/tutorial/LDA/LDA.html#LDA
+http://people.revoledu.com/kardi/tutorial/LDA/LDA.html#LDAformula
+http://people.revoledu.com/kardi/tutorial/LDA/Numerical%20Example.html
+http://www2.ece.ohio-state.edu/~aleix/
+http://www.dtreg.com/lda.htm

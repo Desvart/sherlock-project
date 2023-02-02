@@ -1,0 +1,188 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage{amstex}
+\usepackage{html}
+
+\title{h2m : A set of MATLAB functions for the EM estimation of hidden Markov models with Gaussian state-conditional distributions}
+\author{Olivier Capp\'{e}\\
+ENST dpt. Signal / CNRS-URA 820,\\
+46 rue Barrault, 75634 Paris cedex 13, France.\\
+{\tt cappe@@sig.enst.fr}}
+\date{July 16, 1997}
+
+\newcommand{\hmm}{{\tt h2m}}
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+\section{About \hmm}
+\hmm is a set of functions that implement the EM algorithm \cite{Dempster:EM}, \cite{Wu:EM} in the case of mixture models or hidden Markov models with (multivariate) Gaussian state-conditional distribution. More specifically, three special cases have been considered
+\begin{enumerate}
+\item Gaussian mixture models.
+\item Ergodic (or fully connected) hidden Markov models.
+\item Left-right hidden Markov models.
+\end{enumerate}
+In fact, the case 2 and 3 above do not significantly differ except for the fact that in the case of a left-right HMM, one needs to estimate the parameters from multiple observation sequences. In all three cases, it is possible to use either diagonal or full covariance matrices for the state-conditional distributions.
+
+\section{Changes and bug fixes}
+There is a list of the changes that have been made since the first version of this manual (Mar. 18, 1997) in the file {\tt h2m/doc/CHANGES}. The current version number which should be found in all the mfiles is 1.3.
+
+From a practical point of view, the main changes have been: {\em (i)} There was an omission in the scaling procedure in the unnumbered version (which could cause overflows when the input data was too small). {\em (ii)} In versions 1.1 - 1.2, this was corrected but a brand new bug was introduced in the same part of the code (function {\tt hmm\_fb}), which prevented a correct re-estimation of the transition matrix.
+
+Minor changes include: the renaming of {\tt multgen} to {\tt randindx}, and some new functions ({\tt gauseval}, {\tt gauslogv} and {\tt hmm\_psim} - see list in section~\ref{listoffunc}). 
+
+\section{Data structures}
+No specific data structures have been used, so that a HMM consists of:
+\begin{description}
+  \item [pi0] Row vector containing the probability distribution for the first (unobserved) state: $\pi_0(i) = P(s_1 = i)$.
+  \item [A] Transition matrix: $a_{ij} = P(s_t+1 = j | s_t = i)$.
+  \item [mu] Mean vectors (of the state-conditional distributions) stacked as row vectors, such that \verb+mu(i,:)+ is the mean (row) vector corresponding to the $i$-th state of the HMM.
+  \item [Sigma] Covariance matrices. These are stored one above the other in two different way depending on whether full or diagonal covariance matrices are used: for full covariance matrices,
+\begin{verbatim}
+Sigma((1+(i-1)*p):(i*p),:)
+\end{verbatim}
+(where $p$ is the dimension of the observation vectors) is the covariance matrix corresponding to the $i$-th state; for diagonal covariance matrices, \verb+Sigma(i,:)+ contains the diagonal of the covariance matrix for the $i$-th state (ie. the diagonal coefficients stored as row vectors).
+\end{description}
+For a left-right HMM, \verb+pi0+ is assumed to be deterministic (ie. \verb+pi_0 =+ \verb+[1 0 ... 0]+) and \verb+A+ can be made sparse in order to save memory space (\verb+A+ should be upper triangular for a left-right model).
+
+A Gaussian mixture model, is rather similar except that as the underlying jump process being i.i.d., \verb+pi0+ and \verb+A+ are replaced by a single row vector containing the mixture weights \verb+w+ ($w(i) = P(s_t = i)$).
+
+Most functions (those that have \verb+mu+ and \verb+Sigma+ among their input arguments) are able to determine the dimensions of the model (size of observation vectors and number of states) and the type of covariance matrices (full or diagonal) from the size of their input arguments. This is achieved by the two functions \verb+hmm_chk+ and \verb+mix_chk+.
+
+For more specialized variables such as those that are used during the forward-backward recursions, I have tried to use the notations of L. R. Rabiner in \cite{Rabiner:HMM} (or \cite{Rabiner:SpeechRec}) which seem pretty standard:
+\begin{description}
+\item [alpha] Forward variables: $\alpha_{t}(i) = P(X_1, \ldots, X_t, S_t = i)$.
+\item [beta] Backward variables: $\beta_{t}(i) = P(X_{t+1}, \ldots, X_T | S_t = i)$.
+\item [gamma] A posteriori distributions of the states:
+\[
+\gamma_{t}(i) = P(S_t = i | X_{1}, \ldots, X_T)
+\]
+\end{description}
+
+I have also tried to use systematically the convention of multivariate data analysis that the matrices should have ``more rows than columns'', so that the observation vectors are stacked in \verb+X+ as row vectors (the number of observed vectors being usually greater than their dimension). The same is true for \verb+alpha+, \verb+beta+ and \verb+gamma+ which are $T \times N$ matrices (where $T$ is the number of observation vectors and $N$ the number of states).
+
+\section{Examples}
+The file \verb+doc/examples.m+ contains some MATLAB code corresponding to low dimensional examples of the three basic HMM types that are handled by \hmm. These are:
+
+\subsection{Ergodic model with full covariance matrices}
+Let \verb+X+ denote a matrix containing \verb+T+ observed vectors, the EM estimation of the parameters take the following form:
+\begin{verbatim}
+for i = 1:n_iter
+  [alpha, beta, logscale, dens] = hmm_fb(X, A, pi0, mu, Sigma);
+  logl(i) = log(sum(alpha(T,:))) + logscale;
+  [A, pi0] = hmm_tran(alpha, beta, dens, A, pi0);
+  [mu, Sigma] = hmm_dens(X, alpha, beta, COV_TYPE);
+end;
+\end{verbatim}
+\verb+COV_TYPE+ is just a flag that should be set to 0 when using full covariance matrices and to 1 for diagonal covariance matrices.
+
+Notice that at each step, the log-likelihood is computed from the forward variables using a correction term \verb+logscale+ returned by \verb+hmm_fb+ (for forward-backward) which contains the sum of the logarithmic scaling factors used during the computation of \verb+alpha+ and \verb+beta+. In the present version scaling of the forward variable is performed at each time index $2 \le t \le T$ (which means that each row of the \verb+alpha+ matrix sums to one, except the first one). This systematic scaling appears to be much safer when using input data with largely varying range. The backward variable is scaled using the same normalization factors as indicated in \cite{Rabiner:HMM} (using exactly the same normalization factors is important for the re-estimation of the coefficients of the transition matrix). Note that the mere suppression of the scaling procedure would lead to numerical problems in almost every cases of interest (when the length of the observation sequences if greater than 50 for instance) despite the double precision representation used by MATLAB.
+
+If you don't want to see what's going on you can simply use
+\begin{verbatim}
+[A, pi0, mu, Sigma, logl] = hmm(X, A, pi0, mu, Sigma, n_iter);
+\end{verbatim}
+which calls the very same piece of code except for the fact that the messages concerning the execution time are suppressed: all the computational functions print those messages by default but this can be suppressed by supplying and optional argument (named \verb+QUIET+) different from zero.
+
+\subsection{Left-right HMM}
+This case is not really different from the last one except that the case of multiple observation sequences has been considered:
+\begin{verbatim}
+for i = 1:n_iter
+  [A, logl(i), gamma] = hmm_mest(X, st, A, mu, Sigma);
+  [mu, Sigma] = mix_par(X, gamma, COV_TYPE);
+end;
+\end{verbatim}
+In this case, the matrix \verb+X+ contains all the observation sequences and the vector \verb+st+ yields the index corresponding to the beginning of each sequence so that \verb+X(1:st(2)-1,:)+ contains the vectors that correspond to the first observation sequence, and so on until \verb+X(st(length(st)),length(X(1,:),:)+ which corresponds to the last observation sequence.
+
+The transition parameters are re-estimated inside \verb+hmm_mest+ and the a posteriori distribution of the states are returned in \verb+gamma+. Once again, if you don't want to see what's happening you could more simply use
+\begin{verbatim}
+[A, mu, Sigma, logl] = hmm(X, st, A, mu, Sigma, n_iter);
+\end{verbatim}
+
+In fact, if you need to estimate the parameter of an ergodic model using multiple (independent) observation sequences, you may use \verb+hmm_mest+ as well, but \verb+hmm_mest+ assumes that \verb+pi_0 = [1 0 ... 0]+ (ie. that the Markov chain starts from the first state).
+
+\subsection{Mixture model}
+The EM estimation in the case of mixture model is achieved through
+\begin{verbatim}
+for i = 1:n_iter
+  [gamma, logl(i)] = mix_post(X, w, mu, Sigma);
+  [mu, Sigma, w] = mix_par(X, gamma, COV_TYPE);
+end;
+\end{verbatim}
+or, more simply
+\begin{verbatim}
+[w, mu, Sigma, logl] = mix(X, w, mu, Sigma, n_iter);
+\end{verbatim}
+
+\section{Implementation issues}
+\subsection{Initialization}
+Initialization plays an important part in iterative algorithms such as the EM. Usually the choice of the initialization point will strongly depend on the application considered. I use only two very basic methods of initializing the parameters:
+\begin{description}
+\item [For left-right models] \verb:hmm_mint: initializes all the model parameters using a uniform ``hard'' segmentation of each data sequence (each sequence is splitted in $N$ consecutive sections, where $N$ is he number of states in the HMM, the vectors thus associated with each state are used to obtain initial parameters of the state-conditional distributions).
+\item [For mixture models] \verb:svq: implements a binary splitting vector quantization algorithm. This usually provides efficient initial estimates of the parameters of the Gaussian densities. Note that \verb:svq: uses the unweighted Euclidean distance as performance criterion. If the components of the input vectors are strongly correlated and/or of very different magnitude, it would be preferable to use \verb:svq: on the vectors $\boldsymbol{\Phi} \mathbf{x}_t$ where $\boldsymbol{\Phi}$ is the Cholevski factor associated with ${\rm Cov}^{-1}(\mathbf{x})$ (ie. $\boldsymbol{\Phi}'\boldsymbol{\Phi} = {\rm Cov}^{-1}(\mathbf{x}$).
+\end{description}
+
+\subsection{Modifications of the EM recursions}
+Many people introduce some modifications of the EM algorithm in order to avoid some known pitfalls. The fact that the likelihood becomes infinite for singular covariance matrices is maybe the problem most often encountered in practice. Solutions include thresholding the individual variances coefficients in the diagonal case or adding a constant matrix at each iteration. This is certainly useful, particularly in the case where there is ``not enough'' training data (compared to the complexity of the model). There is however a risk of modifying the properties of the EM algorithm with such modifications, in particular the likelihood may decrease at some iteration.
+%\footnote{A more elegant way of handling such problems would consist in using priors for the HMM parameters, in a Bayesian framework \cite{Gauvain:MAPHMM}.}.
+ No such modification has been used here.
+
+\subsection{Computation time and memory usage}
+Each function is implemented in a rather straightforward way and should be easy to read. In some case (such as \verb:hmm_tran :for instance) however, the code may be less easy to read because of aggressive ``matlabization'' (vectorization) which helps save computing time. Note that one of the most time-consuming operation is the computation of Gaussian density values (for all input vectors and all states of the model). In the case I use more frequently (Gaussian densities with diagonal covariance), I have included a mex-file (\verb:c_dgaus:) which is used in priority if it is found on MATLAB's search path (expect a gain of a factor 5 to 10 on \verb:hmm_fb: and \verb:mix_post:). Some routines could easily be made more efficient (\verb:hmm_vit: for instance) if someone has some time to do so.
+
+These routines are not particularly fast, especially if you are using full covariance matrices or if you can't compile the mex-file \verb:c_dgaus:. I apologize if it looks like a plain old commercial, but: execution time get approximately divided by 10 on functions such as \verb:hmm_fb: when using the MATLAB compiler \verb:mcc:. In the four components 2-D mixture model (last example of file \verb+doc/examples.m+) with 50 000 observation vectors, the execution time (on a SUN SPARC workstation) for each EM iteration is: 3 seconds when using diagonal covariance with the mex-file \verb+c_dgaus+; 3 minutes when using full covariance; 10 seconds for full covariance matrices when the files \verb+mix_post+ and \verb+mix_par+ have been compiled using MATLAB's \verb+mcc+.
+
+Users of MATLAB compiler should compile in priority the file {\tt gauseval} (computation of the Gaussian densities) which represents the main computational load in many of the routines. Compiling the high-level functions like {\tt mix}, {\tt hmm} (and {\tt vq}) is not possible at the moment simply because I used some variable names ending with a trailing underscore (sorry for that!) It wouldn't be very useful anyway since only the compilation of the low-level functions significantly speeds up the computation. Note that functions compiled with {\tt mcc} can't handle sparse matrices, which is a problem for left-right HMMs (for this reason, I don't recommend compiling a function like \verb+hmm_fb+).
+
+Memory space is also a factor to take into account: typically, using more than 50 000 training vectors of dimension 20 with HMMs of size 30 is likely to cause problems on most computers. Usually, the largest matrices are \verb:alpha: and \verb:beta: (forward and backward probabilities), \verb:gamma: (a posteriori distribution for the states) and \verb:dens: (values of Gaussian densities). The solution would consists in reading the training data from disk-files by blocks... but this is another story! 
+
+\section{Other functions}
+The functions \verb+hmm_gen+ and \verb+mix_gen+ generate data vectors according to a given model. This is useful for testing algorithms on ``prototype data''. \verb+hmm_psim+ generates a random sequence of HMM state conditional to an observation sequence. This can be used for doing Monte-Carlo simulations (the way it works is described, for instance, in \cite{Carter:GibbsState} as ``sampling the indicator variables'').
+
+\verb+gauseval+ and \verb+gauslogv+ computes values of the Gaussian probability density (or the logarithm of it for \verb+gauslogv+) for several Gaussian distributions and several observed vectors at the same time. Computing as many values as possible at the same time is much faster than calling the function several times (especially when the number of Gaussian distributions is large).
+
+\verb+gauselps+ plots the 2-D projections of the Gaussian ellipsoids corresponding to the Gaussian distribution (this is certainly one of the most useful things in order to see what's going on, at least for low dimensional models).
+
+\section{List of functions}
+\label{listoffunc}
+\begin{description}
+\item [c\_dgaus]   Computes a set of multivariate normal density values
+            in the case of diagonal covariance matrices (mexfile)
+\item [gauselps]  Plots 2D projections of gaussian ellipsoids.
+\item [gauseval]  Computes a set of multivariate normal density values.
+\item [gauslogv]  Computes a set of multivariate normal log-density values.
+\item [hmm]       Performs multiple iterations of the EM algorithm.
+\item [hmm\_chk]   Checks the parameters of an HMM and returns its dimensions. 
+\item [hmm\_dens]  Reestimates the gaussian parameters for an HMM.
+\item [hmm\_fb]    Implements the forward-backward recursion (with scaling).
+\item [hmm\_gen]   Generates a sequence of observation given an HMM.
+\item [hmm\_mest]  Reestimates the transition parameters for multiple observation
+            sequences.
+\item [hmm\_mint]  Initializes the distribution parameters using multiple
+            observations (left-right model).
+\item [hmm\_psim]  Generates a random sequence of conditional HMM states.
+\item [hmm\_tran]  Reestimates the transition part of an HMM.
+\item [hmm\_vit]   Computes the most likely sequence of states (Viterbi DP
+            algorithm).
+\item [lrhmm]     Performs multiple iterations of the EM algorithm for a
+            left-right model.
+\item [mix]       Performs multiple iterations of the EM algorithm for a
+            mixture model.
+\item [mix\_chk]   Checks the parameters of a mixture model and return its
+            dimensions. 
+\item [mix\_gen]   Generates a sequence of observation for a gaussian mixture
+            model.
+\item [mix\_par]   Reestimates mixture parameters.
+\item [mix\_post]  Computes a posteriori probabilities for a gaussian mixture model.
+\item [randindx]  Generates random indexes with a specified probability distribution.
+\item [svq]       Vector quantization using successive binary splitting steps.
+\item [vq]        Vector quantization using the K-means (or LBG) algorithm.
+\end{description}
+
+\section{Downloading \hmm}
+\hmm\ is available by anonymous FTP as a \htmladdnormallink{unix gz-compressed tape archive at address {\tt ftp://sig.enst.fr/pub/cappe/mfiles/h2m.tar.gz}}{ftp://sig.enst.fr/pub/cappe/mfiles/h2m.tar.gz}.
+
+\bibliographystyle{unsrt}
+\bibliography{header,math,reco}
+
+\end{document}

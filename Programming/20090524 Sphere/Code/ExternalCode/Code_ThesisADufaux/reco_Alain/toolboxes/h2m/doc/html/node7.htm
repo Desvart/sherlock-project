@@ -1,0 +1,36 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Left-right HMM</TITLE>
+<META NAME="description" CONTENT="Left-right HMM">
+<META NAME="keywords" CONTENT="h2m">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="h2m.css">
+</HEAD>
+<BODY LANG="EN" >
+ <B> Next:</B> <A NAME="tex2html115" HREF="node8.html">Mixture model</A>
+<B>Up:</B> <A NAME="tex2html113" HREF="node5.html">Examples</A>
+<B> Previous:</B> <A NAME="tex2html107" HREF="node6.html">Ergodic model with full </A>
+<BR> <P>
+<H2><A NAME="SECTION00052000000000000000">Left-right HMM</A></H2>
+<P>
+This case is not really different from the last one except that the case of multiple observation sequences has been considered:
+<PRE>for i = 1:n_iter
+  [A, logl(i), gamma] = hmm_mest(X, st, A, mu, Sigma);
+  [mu, Sigma] = mix_par(X, gamma, COV_TYPE);
+end;</PRE>
+In this case, the matrix <code>X</code> contains all the observation sequences and the vector <code>st</code> yields the index corresponding to the beginning of each sequence so that <code>X(1:st(2)-1,:)</code> contains the vectors that correspond to the first observation sequence, and so on until <code>X(st(length(st)),length(X(1,:),:)</code> which corresponds to the last observation sequence.
+<P>
+The transition parameters are re-estimated inside <code>hmm_mest</code> and the a posteriori distribution of the states are returned in <code>gamma</code>. Once again, if you don't want to see what's happening you could more simply use
+<PRE>[A, mu, Sigma, logl] = hmm(X, st, A, mu, Sigma, n_iter);</PRE>
+<P>
+In fact, if you need to estimate the parameter of an ergodic model using multiple (independent) observation sequences, you may use <code>hmm_mest</code> as well, but <code>hmm_mest</code> assumes that <code>pi_0 = [1 0 ... 0]</code> (ie. that the Markov chain starts from the first state).
+<P>
+<BR> <HR>
+<P><ADDRESS>
+Olivier Cappé / July 16, 1997
+</ADDRESS>
+</BODY>
+</HTML>

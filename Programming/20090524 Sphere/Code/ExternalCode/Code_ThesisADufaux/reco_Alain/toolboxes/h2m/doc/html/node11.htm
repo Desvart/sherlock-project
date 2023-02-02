@@ -1,0 +1,27 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Modifications of the EM recursions</TITLE>
+<META NAME="description" CONTENT="Modifications of the EM recursions">
+<META NAME="keywords" CONTENT="h2m">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="h2m.css">
+</HEAD>
+<BODY LANG="EN" >
+ <B> Next:</B> <A NAME="tex2html160" HREF="node12.html">Computation time and memory </A>
+<B>Up:</B> <A NAME="tex2html158" HREF="node9.html">Implementation issues</A>
+<B> Previous:</B> <A NAME="tex2html152" HREF="node10.html">Initialization</A>
+<BR> <P>
+<H2><A NAME="SECTION00062000000000000000">Modifications of the EM recursions</A></H2>
+<P>
+Many people introduce some modifications of the EM algorithm in order to avoid some known pitfalls. The fact that the likelihood becomes infinite for singular covariance matrices is maybe the problem most often encountered in practice. Solutions include thresholding the individual variances coefficients in the diagonal case or adding a constant matrix at each iteration. This is certainly useful, particularly in the case where there is ``not enough'' training data (compared to the complexity of the model). There is however a risk of modifying the properties of the EM algorithm with such modifications, in particular the likelihood may decrease at some iteration.
+ No such modification has been used here.
+<P>
+<BR> <HR>
+<P><ADDRESS>
+Olivier Cappé / July 16, 1997
+</ADDRESS>
+</BODY>
+</HTML>

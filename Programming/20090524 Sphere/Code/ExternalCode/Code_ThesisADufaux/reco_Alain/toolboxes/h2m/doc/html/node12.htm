@@ -1,0 +1,34 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Computation time and memory usage</TITLE>
+<META NAME="description" CONTENT="Computation time and memory usage">
+<META NAME="keywords" CONTENT="h2m">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="h2m.css">
+</HEAD>
+<BODY LANG="EN" >
+ <B> Next:</B> <A NAME="tex2html169" HREF="node13.html">Other functions</A>
+<B>Up:</B> <A NAME="tex2html167" HREF="node9.html">Implementation issues</A>
+<B> Previous:</B> <A NAME="tex2html163" HREF="node11.html">Modifications of the EM </A>
+<BR> <P>
+<H2><A NAME="SECTION00063000000000000000">Computation time and memory usage</A></H2>
+<P>
+Each function is implemented in a rather straightforward way and should be easy to read. In some case (such as <code>hmm_tran </code>for instance) however, the code may be less easy to read because of aggressive ``matlabization'' (vectorization) which helps save computing time. Note that one of the most time-consuming operation is the computation of Gaussian density values (for all input vectors and all states of the model). In the case I use more frequently (Gaussian densities with diagonal covariance), I have included a mex-file (<code>c_dgaus</code>) which is used in priority if it is found on MATLAB's search path (expect a gain of a factor 5 to 10 on <code>hmm_fb</code> and <code>mix_post</code>). Some routines could easily be made more efficient (<code>hmm_vit</code> for instance) if someone has some time to do so.
+<P>
+These routines are not particularly fast, especially if you are using full covariance matrices or if you can't compile the mex-file <code>c_dgaus</code>. I apologize if it looks like a plain old commercial, but: execution time get approximately divided by 10 on functions such as <code>hmm_fb</code> when using the MATLAB compiler <code>mcc</code>. In the four components 2-D mixture model (last example of file <code>doc/examples.m</code>) with 50 000 observation vectors, the execution time (on a SUN SPARC workstation) for each EM iteration is: 3 seconds when using diagonal covariance with the mex-file <code>c_dgaus</code>; 3 minutes when using full covariance; 10 seconds for full covariance matrices when the files <code>mix_post</code> and <code>mix_par</code> have been compiled using MATLAB's <code>mcc</code>.
+<P>
+Users of MATLAB compiler should compile in priority the file <TT>gauseval</TT> (computation of the Gaussian densities) which represents the main computational load in many of the routines. Compiling the high-level functions like <TT>mix</TT>, <TT>hmm</TT> (and <TT>vq</TT>) is not possible at the moment simply because I used some variable names ending with a trailing underscore (sorry for that!) It wouldn't be very useful anyway since only the compilation of the low-level functions significantly speeds up the computation. Note that functions compiled with <TT>mcc</TT> can't handle sparse matrices, which is a problem for left-right HMMs (for this reason, I don't recommend compiling a function like <code>hmm_fb</code>).
+<P>
+Memory space is also a factor to take into account: typically, using more than 50 000 training vectors of dimension 20 with HMMs of size 30 is likely to cause problems on most computers. Usually, the largest matrices are <code>alpha</code> and <code>beta</code> (forward and backward probabilities), <code>gamma</code> (a posteriori distribution for the states) and <code>dens</code> (values of Gaussian densities). The solution would consists in reading the training data from disk-files by blocks... but this is another story!
+<P>
+<HR><B> Next:</B> <A NAME="tex2html169" HREF="node13.html">Other functions</A>
+<B>Up:</B> <A NAME="tex2html167" HREF="node9.html">Implementation issues</A>
+<B> Previous:</B> <A NAME="tex2html163" HREF="node11.html">Modifications of the EM </A>
+<P><ADDRESS>
+Olivier Cappé / July 16, 1997
+</ADDRESS>
+</BODY>
+</HTML>

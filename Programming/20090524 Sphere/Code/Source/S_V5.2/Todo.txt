@@ -1,0 +1,34 @@
+- Detection
+
+- Autre m�thodes de r�ductions de dimension
+- LDA
+- Kernel LDA / PCA
+http://en.wikipedia.org/wiki/Dimensionality_reduction
+http://en.wikipedia.org/wiki/Nonlinear_dimensionality_reduction
+http://en.wikipedia.org/wiki/Linear_discriminant_analysis
+
+- 20 EM iterations
+- Split & Merge EM
+
+- Autre techniques de classification
+- HMM
+- ICA (cf. AD) - Apparement plus n�cessaire
+- SVM
+- AdaBoost
+- R�seau de Neurones
+
+- Autre type de modelisation
+- Autoregressive model
+- ARMA
+
+- rejection class and rejection methods
+
+- M�ler le GMM(1) avec Bayes et supprimer Bayes dans les options initiales
+- R�f�rences concernant les fonction bas niveaux
+- Commentaires
+- Documentation
+
+
+
+
+- G�n�rer un fichier de log pour chaque it�ration (entre autre les fichiers utilis�s pour les set d'apprentissage)

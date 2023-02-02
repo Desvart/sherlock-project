@@ -1,0 +1,206 @@
+% This script plot each toc of a signal rawly
+
+% Author : Pitch
+% Date   : 2013.05.27 - 2013.05.28
+
+
+
+%% Prepare Matlab environment
+
+close all;
+clear all;
+clc;
+
+addpath('.\lib\');
+
+
+%% Script parameters
+
+%%% Path
+PROJECT_ROOT_PATH           = '.\\Ongoing\Sherlock Holmes ABP011\';
+DATABASE_PATH               = [PROJECT_ROOT_PATH, 'Data\Database\ML\subDB ML_loop\'];
+FILE_FNAME                  = 'ML156-a1_E00_B03_N01.mat';
+FILE_FPATH                  = [DATABASE_PATH, FILE_FNAME];
+
+%%% Non standard axes borders definition
+MAIN_AXE_POSITION           = [0.025, 0.037, 0.97, 0.94];   % [Left, Bottom, Width, Heigh] Norm.
+
+%%% Zoom axes parameters
+ZOOM_AXE_RELATIVE_POSITION  = [0.04,  0.15,  0.95, 0.80];   % [Left, Bottom, Width, Heigh] Norm.
+Y_LIM                       = [-0.01, 6];                   % [min, max] norm (max value : 1)
+
+%%% Global variables
+N_TOCS_PER_SIGNAL           = 10;           % tocs/signal
+MVT_FREQ                    = 5;            % alt/s
+
+%%% Pandas script paramters
+PANDAS_WIN_SIZE             = 41;           % Samples
+PANDAS_STD_THRESHOLD        = 15;           % - (ratio)
+PANDAS_DIST_THRESHOLD       = 1600;         % Samples
+
+%%%
+TOC_START_DELAY             =  0.5e-3;      % s
+TOC_LENGTH                  = 22e-3;        % s
+
+
+
+%% Some simple proprocessings
+
+fileName = FILE_FNAME( 1 : (strfind(FILE_FNAME, '.')-1) );
+
+
+
+%% Load signal
+
+matObj              = matfile(FILE_FPATH);
+fs                  = matObj.fs;
+signal              = matObj.signal;
+
+%%% Extract some useful properties
+signalLength        = length(signal);
+tAxis               = 1:signalLength;
+
+
+
+%% Estimate toc length
+
+% tocLength           = length(signal) / N_TOCS_PER_SIGNAL;
+tocLength           = TOC_LENGTH * fs;
+
+
+
+%% Locate the starting index of each unlocking
+
+unlockingStartIdxArray = SHH_pandas(signal, PANDAS_WIN_SIZE, PANDAS_STD_THRESHOLD, ...
+                                    PANDAS_DIST_THRESHOLD);
+
+
+
+%% Create a full screen figure in right monitor with minimum borders
+
+%%% Extract screen size
+screenPosition      = get(0, 'ScreenSize'); % pxl
+screenSize          = screenPosition(3:4);  % pxl
+dblScreenSize       = screenSize .* [2, 1]; % Hypothesis : same size double screens (pxl)
+
+%%% Compute figure position
+figureLocation      = [dblScreenSize(1)/2, 0];
+figureSize          = screenSize;
+
+%%% Build figure object
+hFig                = figure(   'OuterPosition',    [figureLocation, figureSize], ...
+                                'Color',            'white', ...
+                                'Name',             FILE_FNAME);
+            
+%%% Build main axes object
+hAx                 = axes(     'Units',            'normalized', ...
+                                'Position',         MAIN_AXE_POSITION);
+hold on;
+
+%%% Compute zoom axe position
+zoomAxeLocation     = figureSize .* ZOOM_AXE_RELATIVE_POSITION(1:2);
+zoomAxeSize         = figureSize .* ZOOM_AXE_RELATIVE_POSITION(3:4);
+zoomAxePosition     = [zoomAxeLocation, zoomAxeSize];
+
+
+
+%% Plot signal
+
+%%% Plot this toc
+signal = abs(signal);
+plot(tAxis, signal);
+
+%%% Change plot properties
+axis tight;
+ylim(Y_LIM);
+
+%%% Plot detected unlocking start index
+plot(unlockingStartIdxArray, signal(unlockingStartIdxArray), '*r');
+
+%%% Plot label
+xlabel('Time [Samples]');
+ylabel('Normalized magnitude [V]');
+    
+    
+
+%% For loop to display each toc
+
+lastIndexToPlot = 0;
+% for iToc = 1 : 1,
+for iToc = 1 : N_TOCS_PER_SIGNAL,
+    
+    
+    
+    %% Display title on main axes
+    
+    str = sprintf('%s - Toc %d', fileName, iToc);
+    title(str, 'interpreter', 'none');
+    
+    
+    
+    %% Extract this toc signal
+    
+    %%% Estimate toc start (i.e.: some samples before unlocking start index)
+    tocStartDelay           = TOC_START_DELAY*fs;
+    tocStartIdx             = max( unlockingStartIdxArray(iToc) - tocStartDelay, 1 );
+    
+    %%% Estimate toc end
+    tocEndIdx               = min( tocStartIdx + TOC_LENGTH*fs, signalLength );
+
+    %%% Extract portion of signal containing this toc
+    signalToPlot            = signal(tocStartIdx:tocEndIdx);
+
+    
+    
+    %% Plot this toc on zoom axes
+    
+    %%% Get various axes properties
+    set(gca, 'units', 'pixels');
+    pos         = get(gca, 'position');
+    xLim        = get(gca, 'xlim');
+    yLim        = get(gca, 'ylim');
+    
+    %%% Compute toc x position in pixel
+    xInAxes     = tAxis(tocStartIdx);
+    xInPixels   = pos(1) + pos(3) * (xInAxes-xLim(1))/(xLim(2)-xLim(1))-1;
+    
+    %%% Compute wen width to see all toc impulses
+    largPxl     = pos(3) * (tocLength-xLim(1))/(xLim(2)-xLim(1));
+    
+    %%% Compute wen height to see all toc impulses
+    maxi        = max( signal( tocStartIdx + (0:tocLength) ) );
+    maxiPxl     = pos(4) * (maxi-yLim(1)) / (yLim(2)-yLim(1)) + 5; % 5 = offset to see boundaries
+
+    %%% Build and plot wen and zoom axes
+    [h1, h2]    = magnify_on_figure(gcf, ...
+                                    'units',                        'pixels', ...
+                                    'initialPositionSecondaryAxes', zoomAxePosition, ...
+                                    'initialPositionMagnifier',     [xInPixels, 0, largPxl, maxiPxl/2], ...
+                                    'mode',                         'manual', ...
+                                    'displayLinkStyle',             'none', ...
+                                    'edgeColor',                    'red', ...
+                                    'secondaryAxesFaceColor',       [0.91, 0.91, 0.91]); % Soft grey 
+    
+        
+        
+    %%
+    pause();
+    
+    
+    
+    %% Delete zoom and wen
+    
+    delete(h1);
+    delete(h2);
+    
+    
+end
+
+
+%% Clean Matlab environment
+
+close(hFig);
+rmpath('.\lib\');
+
+
+%% eof

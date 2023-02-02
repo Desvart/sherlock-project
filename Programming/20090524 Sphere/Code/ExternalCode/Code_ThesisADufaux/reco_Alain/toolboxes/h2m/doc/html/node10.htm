@@ -1,0 +1,30 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<!--Converted with LaTeX2HTML 96.1-h (September 30, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>Initialization</TITLE>
+<META NAME="description" CONTENT="Initialization">
+<META NAME="keywords" CONTENT="h2m">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="h2m.css">
+</HEAD>
+<BODY LANG="EN" >
+ <B> Next:</B> <A NAME="tex2html149" HREF="node11.html">Modifications of the EM </A>
+<B>Up:</B> <A NAME="tex2html147" HREF="node9.html">Implementation issues</A>
+<B> Previous:</B> <A NAME="tex2html141" HREF="node9.html">Implementation issues</A>
+<BR> <P>
+<H2><A NAME="SECTION00061000000000000000">Initialization</A></H2>
+<P>
+Initialization plays an important part in iterative algorithms such as the EM. Usually the choice of the initialization point will strongly depend on the application considered. I use only two very basic methods of initializing the parameters:
+<DL ><DT><STRONG>For left-right models</STRONG>
+<DD> <code>hmm_mint</code> initializes all the model parameters using a uniform ``hard'' segmentation of each data sequence (each sequence is splitted in <I>N</I> consecutive sections, where <I>N</I> is he number of states in the HMM, the vectors thus associated with each state are used to obtain initial parameters of the state-conditional distributions).
+<DT><STRONG>For mixture models</STRONG>
+<DD> <code>svq</code> implements a binary splitting vector quantization algorithm. This usually provides efficient initial estimates of the parameters of the Gaussian densities. Note that <code>svq</code> uses the unweighted Euclidean distance as performance criterion. If the components of the input vectors are strongly correlated and/or of very different magnitude, it would be preferable to use <code>svq</code> on the vectors <IMG WIDTH=30 HEIGHT=25 ALIGN=MIDDLE ALT="tex2html_wrap_inline229" SRC="img9.gif"> where <IMG WIDTH=12 HEIGHT=12 ALIGN=BOTTOM ALT="tex2html_wrap_inline231" SRC="img10.gif"> is the Cholevski factor associated with <IMG WIDTH=70 HEIGHT=32 ALIGN=MIDDLE ALT="tex2html_wrap_inline233" SRC="img11.gif"> (ie. <IMG WIDTH=121 HEIGHT=32 ALIGN=MIDDLE ALT="tex2html_wrap_inline235" SRC="img12.gif">).
+<P>
+</DL><BR> <HR>
+<P><ADDRESS>
+Olivier Cappé / July 16, 1997
+</ADDRESS>
+</BODY>
+</HTML>
